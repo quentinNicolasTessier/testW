@@ -11,7 +11,7 @@ define('DB_PASSWORD', WP_CUBI_CONFIG['DB_PASSWORD']);
 define('DB_HOST', WP_CUBI_CONFIG['DB_HOST']);
 define('DB_CHARSET', 'utf8mb4');
 define('DB_COLLATE', '');
-$table_prefix = '<##DB_PREFIX##>';
+$table_prefix = 'cubi_';
 
 /* DIRECTORIES */
 define('ROOT_DIR', dirname(__DIR__));
@@ -80,7 +80,7 @@ define('WP_CUBI_LOG_MAX_FILES', 30);
 define('WP_CUBI_LOG_CUSTOM_CHANNELS', []);
 
 /* WEBHOOKS */
-define('WP_CUBI_WEBHOOKS_SECRET', '<##WP_CUBI_WEBHOOKS_SECRET##>');
+define('WP_CUBI_WEBHOOKS_SECRET', 'ed7a7c907e1ab83df4247d986fba896e');
 
 /* PUBLIC URLS */
 define('WP_CUBI_PUBLIC_URLS', [
@@ -152,9 +152,9 @@ define('WP_UNHOOKED_CONFIG', [
     'disable-rest-api' => true,
     'disable-sitemaps' => true,
     'disable-smilies' => true,
-    'disable-taxonomy-category' => true,
-    'disable-taxonomy-post-format' => true,
-    'disable-taxonomy-post-tag' => true,
+    'disable-taxonomy-category' => false,
+    'disable-taxonomy-post-format' => false,
+    'disable-taxonomy-post-tag' => false,
     'disable-trackbacks' => true,
     'disable-translation-install' => true,
     'disable-update-notices' => true,
