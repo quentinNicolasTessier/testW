@@ -14,6 +14,9 @@ Version: 1.0
     color: black;
     padding: 0px 20px;
 }
+.header img{
+    max-height: 30px;
+}
 .search-form{
     display: flex;
 }
