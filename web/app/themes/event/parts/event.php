@@ -50,7 +50,9 @@ $description = get_field('description');
         <?php else :
         ?>
             <div>
-                <span>Evenement complet</span>
+                <strong class="complete-event">
+                    <span>Evenement complet</span>
+                </strong>
             </div>
         <div>
             <a href="<?php the_permalink(); ?>"> Voir plus </a>
@@ -105,7 +107,10 @@ $description = get_field('description');
                         </p>
                     </form>
                 <?php else :
-                   ?> <span>Evenement complet</span>
+                   ?>
+                    <strong class="complete-event">
+                        <span>Evenement complet</span>
+                    </strong>
                 <?php endif;
             endif; ?>
         </div>

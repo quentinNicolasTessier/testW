@@ -115,6 +115,10 @@ Version: 1.0
 .submit-form:hover{
     cursor: pointer;
 }
+.complete-event{
+    font-size: 20px;
+    color: red;
+}
 .read-more{
     display: flex;
     justify-content: center;
