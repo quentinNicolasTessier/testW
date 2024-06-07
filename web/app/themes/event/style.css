@@ -74,6 +74,9 @@ Version: 1.0
 .event_content div:last-child{
     margin-bottom: 0;
 }
+.header .submit-form{
+    width: 20%;
+}
 .event_content a, .submit-form,.read-more a{
     background: #0d6efd;
     color: white;
