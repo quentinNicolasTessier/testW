@@ -7,7 +7,9 @@ Requires at least: WordPress 5.0
 Version: 1.0
 */
 .header{
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
     justify-content: space-between;
     align-items: center;
     background: lightgrey;
@@ -19,6 +21,7 @@ Version: 1.0
 }
 .search-form{
     display: flex;
+    justify-content: end;
 }
 .search-form input:first-child{
     margin-right: 10px;
@@ -31,6 +34,7 @@ Version: 1.0
 }
 #menu-main{
     display: flex;
+    justify-content: center;
     padding: 0;
 }
 #menu-main > li{
@@ -51,7 +55,7 @@ Version: 1.0
     margin-top: 20px;
 }
 .event_content{
-    padding:20px 0px;
+    padding:20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
