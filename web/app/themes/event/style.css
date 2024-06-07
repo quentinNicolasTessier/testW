@@ -39,29 +39,6 @@ Version: 1.0
 #menu-main, #menu-main ul{
     list-style: none;
 }
-#menu-main ul{
-    display: none;
-}
-#menu-main .menu-item-has-children:hover ul{
-    display: block;
-    position: absolute;
-    background: lightgrey;
-    padding: 0;
-}
-.sub-menu li {
-    height: 30px;
-    padding-left: 5px;
-    padding-right: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.sub-menu li:hover{
-    background: black;
-}
-.sub-menu li:hover a{
-    color: white;
-}
 
 .wrapper {
     display: grid;
@@ -127,6 +104,16 @@ Version: 1.0
 }
 .success-inscription >strong{
     margin-bottom: 20px;
+}
+#form-inscription input:not([type="submit"]), #form-inscription select{
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    padding: 5px;
+}
+#form-inscription{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .read-more{
     display: flex;

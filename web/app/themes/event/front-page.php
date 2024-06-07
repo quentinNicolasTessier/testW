@@ -1,17 +1,18 @@
 <?php get_header(); ?>
-
+<!-- Recuperation des 3 derniers Event -->
 <?php $my_query = new WP_Query([ 'post_type' => 'event','posts_per_page' => 3,'order' => 'DESC', 'orderby' => 'date', ]);?>
 <div class="wrapper">
 
 <?php
-    // Boucle personnalisée
+    // Boucle sur les event
 if ($my_query->have_posts()) :
     while ($my_query->have_posts()) :
         $my_query->the_post();?>
             <?php get_template_part('parts/event'); ?>
     <?php endwhile;
 endif;
-    $category_slug = 'event'; // Remplacez par le slug de votre catégorie
+    //Recuperation de l'url de la category event pour afficher le bouton qui emmene vers la page de liste
+    $category_slug = 'event';
 
     // Obtenir l'objet catégorie par son slug
     $category = get_category_by_slug($category_slug);

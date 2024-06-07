@@ -4,7 +4,7 @@
         the_post(); ?>
 
     <div class="event-container">
-
+            <!-- Affichage de l'event -->
             <?php get_template_part('parts/event'); ?>
     </div>
 
