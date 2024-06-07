@@ -42,8 +42,10 @@ Version: 1.0
 #menu-main ul{
     display: none;
 }
-#menu-main:hover ul{
+#menu-main .menu-item-has-children:hover ul{
     display: block;
+    position: absolute;
+    background: lightgrey;
     padding: 0;
 }
 .sub-menu li {
