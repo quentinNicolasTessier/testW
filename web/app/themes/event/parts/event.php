@@ -64,7 +64,10 @@ $description = get_field('description');
                     $billet_entree = get_field('billet');
                     $url_billet = $billet_entree ? wp_get_attachment_url($billet_entree) : '';
                     if ($billet_entree) : ?>
-                        <p class="submit-container">
+                        <p class="submit-container success-inscription">
+                            <strong>
+                                <span class="complete-inscription">Inscription Réussie</span>
+                            </strong>
                             <a href="<?php echo esc_url($url_billet); ?>" download>Télécharger votre billet d'entrée</a>
                         </p>
                     <?php endif;

@@ -115,9 +115,18 @@ Version: 1.0
 .submit-form:hover{
     cursor: pointer;
 }
-.complete-event{
+.complete-event, .complete-inscription{
     font-size: 20px;
+}
+.complete-event{
     color: red;
+}
+.success-inscription{
+    flex-direction: column;
+    align-items: center;
+}
+.success-inscription >strong{
+    margin-bottom: 20px;
 }
 .read-more{
     display: flex;
