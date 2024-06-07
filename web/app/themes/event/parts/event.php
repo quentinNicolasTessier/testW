@@ -44,11 +44,10 @@ $description = get_field('description');
     $inscriptions_count = compter_inscriptions(get_the_ID());
     $places_restantes = get_field('number_available_place', get_the_ID());
     $unlimited_place = get_field('unlimited_place', get_the_ID());
-    if (!isset($_GET['event'])):
+    if (!isset($_GET['event'])) :
         if ($unlimited_place === true || ($unlimited_place === false && $places_restantes > 0)) : ?>
             <a href="<?php the_permalink(); ?>"> M'inscrire </a>
-        <?php else :
-        ?>
+        <?php else : ?>
             <div>
                 <strong class="complete-event">
                     <span>Evenement complet</span>
@@ -60,11 +59,11 @@ $description = get_field('description');
         <?php endif;?>
     <?php else : ?>
         <div>
-            <?php if (isset($_GET['inscription'])):
-                if ($_GET['inscription'] == 'success'):
+            <?php if (isset($_GET['inscription'])) :
+                if ($_GET['inscription'] == 'success') :
                     $billet_entree = get_field('billet');
-                    $url_billet=$billet_entree ? wp_get_attachment_url($billet_entree) : '';
-                     if ($billet_entree): ?>
+                    $url_billet = $billet_entree ? wp_get_attachment_url($billet_entree) : '';
+                    if ($billet_entree) : ?>
                         <p class="submit-container">
                             <a href="<?php echo esc_url($url_billet); ?>" download>Télécharger votre billet d'entrée</a>
                         </p>
@@ -106,8 +105,7 @@ $description = get_field('description');
                             <input type="submit" class="submit-form" value="S'inscrire">
                         </p>
                     </form>
-                <?php else :
-                   ?>
+                <?php else : ?>
                     <strong class="complete-event">
                         <span>Evenement complet</span>
                     </strong>
