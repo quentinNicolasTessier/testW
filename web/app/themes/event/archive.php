@@ -22,9 +22,11 @@
             else :
                 if (have_posts()) :
                     while (have_posts()) :
-                        the_post(); ?>
-                    <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                    <?php endwhile;
+                        the_post();
+                        if (get_post_type(get_the_ID()) != "inscription") :?>
+                            <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                        <?php endif;
+                    endwhile;
                 endif;
             endif;?>
             </div>
