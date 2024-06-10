@@ -17,7 +17,22 @@ add_action('init', function () {
 });
 
 add_action('init', function () {
-    register_extended_post_type('inscription');
+    $args = [
+        'label' => 'inscription',
+        'public' => true,
+        'exclude_from_search' => true,
+        'publicly_queryable' => false,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'query_var' => false,
+        'rewrite' => false,
+        'capability_type' => 'post',
+        'has_archive' => false,
+        'hierarchical' => false,
+        'menu_position' => null,
+        'supports' => ['title', 'editor', 'thumbnail'],
+    ];
+    register_extended_post_type('inscription', $args);
 });
 
 // Compter les inscriptions pour un événement donné
