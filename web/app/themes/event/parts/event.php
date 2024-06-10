@@ -64,7 +64,7 @@ $description = get_field('description');
                 if ($_GET['inscription_event'] == 'success') :
                     $billet_entree = get_field('billet');
                     $url_billet = $billet_entree ? wp_get_attachment_url($billet_entree) : '';
-                    if ($billet_entree) : ?>
+                    if ($url_billet) : ?>
                         <p class="submit-container success-inscription">
                             <strong>
                                 <span class="complete-inscription">Inscription Réussie</span>
@@ -91,7 +91,7 @@ $description = get_field('description');
                         </p>
                         <p>
                             <label for="date_naissance">Date de naissance:</label>
-                            <input placeholder="Date de Naissance" type="date" id="date_naissance" name="date_naissance" required>
+                            <input placeholder="Date de Naissance" type="date" id="date_naissance" name="date_naissance" max="<?= date('Y-m-d'); ?>" required>
                         </p>
                         <p>
                             <label for="status">Statut:</label>

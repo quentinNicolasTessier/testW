@@ -92,3 +92,79 @@ function gerer_inscription_evenement()
 
 add_action('admin_post_inscription_evenement', 'gerer_inscription_evenement');
 add_action('admin_post_nopriv_inscription_evenement', 'gerer_inscription_evenement');
+
+// Fonction pour ajouter une colonne personnalisée sur la liste des Event
+function custom_add_event_column($columns)
+{
+    $columns['nb_place'] = 'Nombre de Place';
+    $columns['nb_inscription'] = 'Nombre d\'inscription';
+    return $columns;
+}
+
+// Fonction pour ajouter une colonne personnalisée sur la liste des inscriptions
+function custom_add_inscription_column($columns)
+{
+    // Ajouter une nouvelle colonne avec le titre "Custom Column"
+    $columns['nom'] = 'Nom';
+    $columns['prenom'] = 'Prenom';
+    $columns['mail'] = 'Email';
+    $columns['date_naissance'] = 'Date de naissance';
+    $columns['statut'] = 'Statut';
+    $columns['titre'] = 'Titre de l\'evenement';
+    return $columns;
+}
+add_filter('manage_event_posts_columns', 'custom_add_event_column');
+add_filter('manage_inscription_posts_columns', 'custom_add_inscription_column');
+
+// Fonction pour afficher le contenu de la colonne personnalisée pour les event
+function custom_display_event_column($column)
+{
+    // Vérifier si c'est notre colonne personnalisée
+    switch ($column) {
+        case 'nb_place':
+            // Afficher le nombre de place disponible
+            $unlimited_place = get_field('unlimited_place', get_the_ID());
+            if ($unlimited_place === false) {
+                the_field('number_place');
+            } else {
+                echo 'Illimité';
+            }
+            break;
+        case 'nb_inscription':
+            // Afficher le nombre d'inscription
+            echo compter_inscriptions(get_the_ID());
+            break;
+    }
+}
+
+// Fonction pour afficher le contenu de la colonne personnalisée pour les inscriptions
+function custom_display_inscription_column($column)
+{
+    //Afficher tout les infos sur la personne et le nom de l'evenement
+    switch ($column) {
+        case 'nom':
+            the_field('nom');
+            break;
+        case 'prenom':
+            the_field('prenom');
+            break;
+        case 'mail':
+            the_field('email');
+            break;
+        case 'date_naissance':
+            the_field('date_naissance');
+            break;
+        case 'statut':
+            the_field('status');
+            break;
+        case 'titre':
+            $evenement_id = get_field('evenement_id', get_the_ID());
+            $title = get_field('titre', get_post($evenement_id)->ID);
+            echo $title;
+            break;
+    }
+}
+
+
+add_action('manage_inscription_posts_custom_column', 'custom_display_inscription_column', 10);
+add_action('manage_event_posts_custom_column', 'custom_display_event_column', 10);
