@@ -51,7 +51,7 @@ Version: 1.0
     grid-auto-rows: minmax(100px, auto);
     margin-top: 20px;
 }
-.wrapper a{
+.wrapper a,.site__navigation a{
     text-decoration: none;
     color: black;
 }
