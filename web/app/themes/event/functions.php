@@ -1,10 +1,15 @@
 <?php
 
+require_once __DIR__ . '/Model/Event.php';
+require_once __DIR__ . '/Model/Inscription.php';
+
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Style;
 use OpenSpout\Writer\XLSX\Writer;
 use OpenSpout\Common\Exception\IOException;
 use OpenSpout\Writer\Exception\WriterNotOpenedException;
+use Model\Event;
+use Model\Inscription;
 
 // Ajouter la prise en charge des images mises en avant
 add_theme_support('post-thumbnails');
@@ -70,30 +75,32 @@ function gerer_inscription_evenement()
         $status = $_POST['status'];
         $email = sanitize_email($_POST['email']);
         $evenement_id = intval($_POST['evenement_id']);
+        $inscription = new Inscription($nom, $prenom, $email, $dateNaissance, $status, $evenement_id);
 
         // Vérifier le nombre de places disponibles ou si c'est illimité
-        $nombre_places = get_field('number_place', $evenement_id);
+        $event = new Event("", "", "", "", "", "", get_field('unlimited_place', $evenement_id));
+        if ($event->isPlaceIllimite() === false) {
+            $event->setNombrePlace(get_field('number_place', $evenement_id));
+        }
         $inscriptions_count = compter_inscriptions($evenement_id);
-        $unlimited_place = get_field('unlimited_place', $evenement_id);
-        if ($unlimited_place === true  || ($unlimited_place === false && $inscriptions_count < $nombre_places)) {
+        if ($event->isPlaceIllimite() === true  || ($event->isPlaceIllimite() === false && $inscriptions_count < $event->getNombrePlace())) {
             // Enregistrer l'inscription dans la base de données
             $inscription_id = wp_insert_post([
                 'post_title' => $nom,
                 'post_type' => 'inscription',
                 'post_status' => 'publish',
                 'meta_input' => [
-                    'nom' => $nom,
-                    'prenom' => $prenom,
-                    'date_naissance' => $dateNaissance,
-                    'status' => $status,
-                    'email' => $email,
-                    'evenement_id' => $evenement_id,
+                    'nom' => $inscription->getNom(),
+                    'prenom' => $inscription->getPrenom(),
+                    'date_naissance' => $inscription->getDateNaissance(),
+                    'status' => $inscription->getStatut(),
+                    'email' => $inscription->getEmail(),
+                    'evenement_id' => $inscription->getEventId(),
                 ],
             ]);
-            $billet_entree = get_field('billet', $evenement_id);
-            $url_billet = $billet_entree ? wp_get_attachment_url($billet_entree) : '';
+            $url_billet = $event->getBillet() ? wp_get_attachment_url($event->getBillet()) : '';
             //Envoie du mail de comfirmation avec l'url du billet de la place si presént
-            if ($billet_entree) {
+            if ($event->getBillet()) {
                 $to = $email;
                 $subject = 'Confirmation d\'inscription à l\'événement';
                 $body = 'Merci pour votre inscription à l\'événement. Vous pouvez télécharger votre billet d\'entrée en suivant ce lien : ' . esc_url($url_billet);
@@ -145,9 +152,9 @@ function custom_display_event_column($column): void
     switch ($column) {
         case 'nb_place':
             // Afficher le nombre de place disponible
-            $unlimited_place = get_field('unlimited_place', get_the_ID());
-            if ($unlimited_place === false) {
-                the_field('number_place');
+            $event = new Event("", "", "", "", "", "", get_field('unlimited_place', get_the_ID()));
+            if ($event->isPlaceIllimite() === false) {
+                echo $event->getNombrePlace();
             } else {
                 echo 'Illimité';
             }
@@ -176,27 +183,27 @@ function custom_display_event_column($column): void
 // Fonction pour afficher le contenu de la colonne personnalisée pour les inscriptions
 function custom_display_inscription_column($column): void
 {
+    $inscription = new Inscription(get_field("nom", get_the_ID()), get_field("prenom", get_the_ID()), get_field("email", get_the_ID()), get_field("date_naissance", get_the_ID()), get_field("status", get_the_ID()), get_field('evenement_id', get_the_ID()));
     //Afficher tout les infos sur la personne et le nom de l'evenement
     switch ($column) {
         case 'nom':
-            the_field('nom');
+            echo $inscription->getNom();
             break;
         case 'prenom':
-            the_field('prenom');
+            echo $inscription->getPrenom();
             break;
         case 'mail':
-            the_field('email');
+            echo $inscription->getEmail();
             break;
         case 'date_naissance':
-            the_field('date_naissance');
+            echo $inscription->getDateNaissance();
             break;
         case 'statut':
-            the_field('status');
+            echo $inscription->getStatut();
             break;
         case 'titre':
-            $evenement_id = get_field('evenement_id', get_the_ID());
-            $title = get_field('titre', get_post($evenement_id)->ID);
-            echo $title;
+            $event = new Event(get_field('titre', get_post($inscription->getEventId())->ID), "", "", "", "", "", false);
+            echo $event->getTitre();
             break;
     }
 }
@@ -219,48 +226,7 @@ function handle_export_event(): void
             $writer = new Writer();
             // Ouvrir le writer
             $writer->openToBrowser("export-inscription-event-{$post_id}.{$fileType}");
-
-            // Créer un style pour l'en-tête
-            $style = new Style();
-            $style->setFontBold();
-
-            $args = [
-                'post_type' => 'inscription',
-                'meta_query' => [
-                    [
-                        'key' => 'evenement_id',
-                        'value' => $post_id,
-                        'compare' => '='
-                    ]
-                ]
-            ];
-            //Recuperation de la liste des inscription pour l'event correspondant
-            $query = new WP_Query($args);
-            if ($query->have_posts()) {
-                // Ajouter les en-têtes des colonnes
-                $rowFromValues = Row::fromValues(['Nom', 'Prenom', 'Email', "Date de naissance", "Statut"], $style);
-                try {
-                    $writer->addRow($rowFromValues);
-                } catch (IOException | WriterNotOpenedException $e) {
-                    wp_die(__($e->getMessage()));
-                }
-                // Ajouter Les inscriptions au fichier
-                while ($query->have_posts()) {
-                    $query->the_post();
-                    $post_id = get_the_ID();
-
-                    // Récupérer les informations des inscriptions
-                    $rowFromValues =  Row::fromValues([get_field("nom", $post_id), get_field("prenom", $post_id), get_field("email", $post_id), get_field("date_naissance", $post_id), get_field("status", $post_id)]);
-                    try {
-                        $writer->addRow($rowFromValues);
-                    } catch (IOException | WriterNotOpenedException $e) {
-                        wp_die(__($e->getMessage()));
-                    }
-                }
-                // Fermer le writer
-                $writer->close();
-                exit;
-            }
+            get_file_excel($post_id, $writer);
         } else {
             wp_die(__('Post non trouvé.'));
         }
@@ -268,8 +234,92 @@ function handle_export_event(): void
         wp_die(__('Requête invalide.'));
     }
 }
+function get_file_excel($post_id, $writer): void
+{
+    // Créer un style pour l'en-tête
+    $style = new Style();
+    $style->setFontBold();
+    $args = [
+        'post_type' => 'inscription',
+        'meta_query' => [
+            [
+                'key' => 'evenement_id',
+                'value' => $post_id,
+                'compare' => '='
+            ]
+        ]
+    ];
+    //Recuperation de la liste des inscription pour l'event correspondant
+    $query = new WP_Query($args);
+    if ($query->have_posts()) {
+        // Ajouter les en-têtes des colonnes
+        $rowFromValues = Row::fromValues(['Nom', 'Prenom', 'Email', "Date de naissance", "Statut"], $style);
+        try {
+            $writer->addRow($rowFromValues);
+        } catch (IOException | WriterNotOpenedException $e) {
+            wp_die(__($e->getMessage()));
+        }
+        // Ajouter Les inscriptions au fichier
+        while ($query->have_posts()) {
+            $query->the_post();
+            $post_id = get_the_ID();
+            $inscription = new Inscription(get_field("nom", $post_id), get_field("prenom", $post_id), get_field("email", $post_id), get_field("date_naissance", $post_id), get_field("status", $post_id), $post_id);
+            // Récupérer les informations des inscriptions
+            $rowFromValues =  Row::fromValues([$inscription->getNom(), $inscription->getPrenom(), $inscription->getEmail(), $inscription->getDateNaissance(), $inscription->getStatut()]);
+            try {
+                $writer->addRow($rowFromValues);
+            } catch (IOException | WriterNotOpenedException $e) {
+                wp_die(__($e->getMessage()));
+            }
+        }
+        // Fermer le writer
+        $writer->close();
+    }
+}
+
+/**
+ * @throws IOException
+ */
+function excel_file_cron()
+{
+    $args = [
+        'post_type' => 'event',
+        'posts_per_page' => 3,
+        'order' => 'DESC',
+        'orderby' => 'date',
+    ];
+    $query = new WP_Query($args);
+    if ($query->have_posts()) {
+        $excelFile = [];
+        while ($query->have_posts()) {
+            $query->the_post();
+            $post_id = get_the_ID();
+            // Définir le type de fichier (Excel ou CSV)
+            $fileType = 'xlsx';
+            $filePath = __DIR__ . "/cron/export-inscription-event-{$post_id}.{$fileType}";
+
+            // Créer un writer
+            $writer = new Writer();
+            // Ouvrir le writer
+            $writer->openToFile($filePath);
+            get_file_excel($post_id, $writer);
+            $excelFile[] = __DIR__  . "/cron/export-inscription-event-{$post_id}.{$fileType}";
+        }
+        $to = "quentin.tessier@globalis-ms.com";
+        $subject = 'Liste des participants event';
+        $body = 'Voici la liste des participants au 3 dernier event';
+        $headers = ['Content-Type: text/html; charset=UTF-8'];
+        wp_mail($to, $subject, $body, $headers, $excelFile);
+    }
+}
+
+add_action('mon_event_cron', 'excel_file_cron');
 
 
 add_action('admin_post_export_cpt', 'handle_export_event');
 add_action('manage_inscription_posts_custom_column', 'custom_display_inscription_column', 10);
 add_action('manage_event_posts_custom_column', 'custom_display_event_column', 10);
+
+if (!wp_next_scheduled('mon_event_cron')) {
+    wp_schedule_event(time(), 'daily', 'mon_event_cron');
+}

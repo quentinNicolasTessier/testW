@@ -1,51 +1,57 @@
 <?php
+require_once __DIR__ . '/../Model/Event.php';
+use Model\Event;
 //Recuperation des infos de l'evenement
-$titre = get_field('titre');
-$visuel = get_field('visuel');
-$adresse = get_field('adresse');
-$date = get_field('date');
-$description = get_field('description');
+$event = new Event(
+    get_field('titre', get_the_ID()),
+    get_field('description', get_the_ID()),
+    get_field('adresse', get_the_ID()),
+    get_field('date', get_the_ID()),
+    get_field('visuel', get_the_ID()),
+    get_field('billet', get_the_ID()),
+    get_field('unlimited_place', get_the_ID())
+);
+if ($event->isPlaceIllimite() === false) {
+    $event->setNombrePlace(get_field('number_place', get_the_ID()));
+}
+
 ?>
 <div class="event_content">
-    <?php if ($visuel) : ?>
+    <?php if ($event->getVisuel()) : ?>
         <div>
             <?php
-            $image_id = get_field('visuel'); // On récupère cette fois l'ID
-            if ($image_id) {
-                echo wp_get_attachment_image($image_id);
-            } ?>
+            echo wp_get_attachment_image($event->getVisuel());
+            ?>
         </div>
     <?php endif;
-    if ($titre) : ?>
+    if ($event->getTitre()) : ?>
         <div>
             <strong>Nom :</strong>
-            <?php the_field('titre'); ?>
+            <?php echo $event->getTitre() ?>
         </div>
     <?php endif;
-    if ($adresse) : ?>
+    if ($event->getAdresse()) : ?>
         <div>
             <strong>Adresse :</strong>
-            <?php the_field('adresse'); ?>
+            <?php echo $event->getAdresse(); ?>
         </div>
     <?php endif;
-    if ($date) : ?>
+    if ($event->getDate()) : ?>
         <div>
             <strong>Date :</strong>
-            <?php the_field('date'); ?>
+            <?php echo $event->getDate(); ?>
         </div>
     <?php endif;
-    if ($description) : ?>
+    if ($event->getDescription()) : ?>
         <div>
             <strong>Description :</strong>
-            <?php the_field('description'); ?>
+            <?php echo $event->getDescription() ?>
         </div>
     <?php endif;
     //Verifier le nombre de place disponible et empcher l'inscription si complet
-    $nombre_places = get_field('number_place');
     $inscriptions_count = compter_inscriptions(get_the_ID());
-    $unlimited_place = get_field('unlimited_place', get_the_ID());
     if (!isset($_GET['event'])) :
-        if ($unlimited_place === true || ($unlimited_place === false && $inscriptions_count < $nombre_places)) : ?>
+        if ($event->isPlaceIllimite() === true || ($event->isPlaceIllimite() === false && $inscriptions_count < $event->getNombrePlace())) : ?>
             <a href="<?php the_permalink(); ?>"> M'inscrire </a>
         <?php else : ?>
             <div>
@@ -62,8 +68,7 @@ $description = get_field('description');
             <?php //Verifier que l'inscription est un succes et ajouter bouton pour telecharger le billet de l'event s'il existe
             if (isset($_GET['inscription_event'])) :
                 if ($_GET['inscription_event'] == 'success') :
-                    $billet_entree = get_field('billet');
-                    $url_billet = $billet_entree ? wp_get_attachment_url($billet_entree) : '';
+                    $url_billet = $event->getBillet() ? wp_get_attachment_url($event->getBillet()) : '';
                     if ($url_billet) : ?>
                         <p class="submit-container success-inscription">
                             <strong>
@@ -75,7 +80,7 @@ $description = get_field('description');
                 endif;
             else :
                 //Verification que l'evenement n'est pas complet pour afficher le formulaire d'inscription
-                if ($unlimited_place === true || ($unlimited_place === false && $inscriptions_count < $nombre_places)) : ?>
+                if ($event->isPlaceIllimite() === true || ($event->isPlaceIllimite() === false && $inscriptions_count < $event->getNombrePlace())) : ?>
                     <h2>Inscription à l'evenement</h2>
                     <form id="form-inscription" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
                         <input type="hidden" name="action" value="inscription_evenement">
