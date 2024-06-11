@@ -78,7 +78,7 @@ function gerer_inscription_evenement()
         $inscription = new Inscription($nom, $prenom, $email, $dateNaissance, $status, $evenement_id);
 
         // Vérifier le nombre de places disponibles ou si c'est illimité
-        $event = new Event("", "", "", "", "", "", get_field('unlimited_place', $evenement_id));
+        $event = new Event("", "", "", "", "", get_field('billet', $evenement_id), get_field('unlimited_place', $evenement_id));
         if ($event->isPlaceIllimite() === false) {
             $event->setNombrePlace(get_field('number_place', $evenement_id));
         }
@@ -305,7 +305,7 @@ function excel_file_cron()
             get_file_excel($post_id, $writer);
             $excelFile[] = __DIR__  . "/cron/export-inscription-event-{$post_id}.{$fileType}";
         }
-        $to = "quentin.tessier@globalis-ms.com";
+        $to = "testglob@yopmail.com";
         $subject = 'Liste des participants event';
         $body = 'Voici la liste des participants au 3 dernier event';
         $headers = ['Content-Type: text/html; charset=UTF-8'];
