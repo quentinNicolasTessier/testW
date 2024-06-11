@@ -103,9 +103,9 @@ function gerer_inscription_evenement()
             if ($event->getBillet()) {
                 $to = $email;
                 $subject = 'Confirmation d\'inscription à l\'événement';
-                $body = 'Merci pour votre inscription à l\'événement. Vous pouvez télécharger votre billet d\'entrée en suivant ce lien : ' . esc_url($url_billet);
+                $body = 'Merci pour votre inscription à l\'événement. Veuillez trouver ci-joint votre billet d\'entrée';
                 $headers = ['Content-Type: text/html; charset=UTF-8'];
-                wp_mail($to, $subject, $body, $headers);
+                wp_mail($to, $subject, $body, $headers, [$url_billet]);
             }
             // Rediriger vers une page de confirmation
             wp_redirect(add_query_arg('inscription_event', 'success', get_permalink($evenement_id)));
