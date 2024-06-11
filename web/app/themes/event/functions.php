@@ -1,5 +1,11 @@
 <?php
 
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Writer\XLSX\Writer;
+use OpenSpout\Common\Exception\IOException;
+use OpenSpout\Writer\Exception\WriterNotOpenedException;
+
 // Ajouter la prise en charge des images mises en avant
 add_theme_support('post-thumbnails');
 
@@ -84,7 +90,7 @@ function gerer_inscription_evenement()
                     'evenement_id' => $evenement_id,
                 ],
             ]);
-            $billet_entree = get_field('billet');
+            $billet_entree = get_field('billet', $evenement_id);
             $url_billet = $billet_entree ? wp_get_attachment_url($billet_entree) : '';
             //Envoie du mail de comfirmation avec l'url du billet de la place si presént
             if ($billet_entree) {
@@ -113,6 +119,7 @@ function custom_add_event_column($columns)
 {
     $columns['nb_place'] = 'Nombre de Place';
     $columns['nb_inscription'] = 'Nombre d\'inscription';
+    $columns['export'] = 'Exporter';
     return $columns;
 }
 
@@ -132,7 +139,7 @@ add_filter('manage_event_posts_columns', 'custom_add_event_column');
 add_filter('manage_inscription_posts_columns', 'custom_add_inscription_column');
 
 // Fonction pour afficher le contenu de la colonne personnalisée pour les event
-function custom_display_event_column($column)
+function custom_display_event_column($column): void
 {
     // Vérifier si c'est notre colonne personnalisée
     switch ($column) {
@@ -149,11 +156,25 @@ function custom_display_event_column($column)
             // Afficher le nombre d'inscription
             echo compter_inscriptions(get_the_ID());
             break;
+        case 'export':
+            $export_url = wp_nonce_url(
+                add_query_arg(
+                    [
+                        'action' => 'export_cpt',
+                        'post_id' => get_the_ID(),
+                    ],
+                    admin_url('admin-post.php')
+                ),
+                'export_cpt_' . get_the_ID()
+            );
+
+            echo '<a href="' . esc_url($export_url) . '" class="button">Exporter</a>';
+            break;
     }
 }
 
 // Fonction pour afficher le contenu de la colonne personnalisée pour les inscriptions
-function custom_display_inscription_column($column)
+function custom_display_inscription_column($column): void
 {
     //Afficher tout les infos sur la personne et le nom de l'evenement
     switch ($column) {
@@ -180,6 +201,75 @@ function custom_display_inscription_column($column)
     }
 }
 
+function handle_export_event(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(__('Vous n\'avez pas les permissions nécessaires pour accéder à cette page.'));
+    }
 
+    if (isset($_GET['post_id']) && check_admin_referer('export_cpt_' . intval($_GET['post_id']))) {
+        $post_id = intval($_GET['post_id']);
+        $post = get_post($post_id);
+
+        if ($post) {
+            // Définir le type de fichier (Excel ou CSV)
+            $fileType = 'xlsx';
+
+            // Créer un writer
+            $writer = new Writer();
+            // Ouvrir le writer
+            $writer->openToBrowser("export-inscription-event-{$post_id}.{$fileType}");
+
+            // Créer un style pour l'en-tête
+            $style = new Style();
+            $style->setFontBold();
+
+            $args = [
+                'post_type' => 'inscription',
+                'meta_query' => [
+                    [
+                        'key' => 'evenement_id',
+                        'value' => $post_id,
+                        'compare' => '='
+                    ]
+                ]
+            ];
+            //Recuperation de la liste des inscription pour l'event correspondant
+            $query = new WP_Query($args);
+            if ($query->have_posts()) {
+                // Ajouter les en-têtes des colonnes
+                $rowFromValues = Row::fromValues(['Nom', 'Prenom', 'Email', "Date de naissance", "Statut"], $style);
+                try {
+                    $writer->addRow($rowFromValues);
+                } catch (IOException | WriterNotOpenedException $e) {
+                    wp_die(__($e->getMessage()));
+                }
+                // Ajouter Les inscriptions au fichier
+                while ($query->have_posts()) {
+                    $query->the_post();
+                    $post_id = get_the_ID();
+
+                    // Récupérer les informations des inscriptions
+                    $rowFromValues =  Row::fromValues([get_field("nom", $post_id), get_field("prenom", $post_id), get_field("email", $post_id), get_field("date_naissance", $post_id), get_field("status", $post_id)]);
+                    try {
+                        $writer->addRow($rowFromValues);
+                    } catch (IOException | WriterNotOpenedException $e) {
+                        wp_die(__($e->getMessage()));
+                    }
+                }
+                // Fermer le writer
+                $writer->close();
+                exit;
+            }
+        } else {
+            wp_die(__('Post non trouvé.'));
+        }
+    } else {
+        wp_die(__('Requête invalide.'));
+    }
+}
+
+
+add_action('admin_post_export_cpt', 'handle_export_event');
 add_action('manage_inscription_posts_custom_column', 'custom_display_inscription_column', 10);
 add_action('manage_event_posts_custom_column', 'custom_display_event_column', 10);

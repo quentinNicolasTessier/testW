@@ -55,6 +55,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/wecodemore/wordpress-early-hook" />
       <excludeFolder url="file://$MODULE_DIR$/web/app/modules/query-monitor/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/web/app/modules/wp-crontrol/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/openspout/openspout" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
