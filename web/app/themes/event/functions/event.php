@@ -30,6 +30,7 @@ function custom_display_event_column($column): void
             // Afficher le nombre de place disponible
             $event = new Event("", "", "", "", "", "", get_field('unlimited_place', get_the_ID()));
             if ($event->isPlaceIllimite() === false) {
+                $event->setNombrePlace(get_field('number_place', get_the_ID()));
                 echo $event->getNombrePlace();
             } else {
                 echo 'Illimité';
