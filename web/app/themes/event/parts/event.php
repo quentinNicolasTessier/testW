@@ -68,16 +68,16 @@ if ($event->isPlaceIllimite() === false) {
             <?php //Verifier que l'inscription est un succes et ajouter bouton pour telecharger le billet de l'event s'il existe
             if (isset($_GET['inscription_event'])) :
                 if ($_GET['inscription_event'] == 'success') :
-                    $url_billet = $event->getBillet() ? wp_get_attachment_url($event->getBillet()) : '';
-                    if ($url_billet) : ?>
+                    $url_billet = $event->getBillet() ? wp_get_attachment_url($event->getBillet()) : '';?>
                         <p class="submit-container success-inscription">
                             <strong>
                                 <span class="complete-inscription">Inscription Réussie</span>
                             </strong>
-                            <a href="<?php echo esc_url($url_billet); ?>" download>Télécharger votre billet d'entrée</a>
+                            <?php if ($url_billet) : ?>
+                                <a href="<?php echo esc_url($url_billet); ?>" download>Télécharger votre billet d'entrée</a>
+                            <?php endif;?>
                         </p>
-                    <?php endif;
-                endif;
+                <?php endif;
             else :
                 //Verification que l'evenement n'est pas complet pour afficher le formulaire d'inscription
                 if ($event->isPlaceIllimite() === true || ($event->isPlaceIllimite() === false && $inscriptions_count < $event->getNombrePlace())) : ?>

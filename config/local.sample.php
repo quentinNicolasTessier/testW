@@ -25,3 +25,9 @@ define('WP_CUBI_TRANSIENT_CACHE_DISABLE_AUTO_CACHE_NAV_MENUS', false);
 // define('WP_MAIL_SMTP_HOST', '127.0.0.1');
 // define('WP_MAIL_SMTP_PORT', 1025);
 // define('WP_MAIL_SMTP_AUTH', false);
+
+define('WP_MAIL_SMTP_ENABLED', true);
+define('WP_MAIL_SMTP_HOST', 'localhost');
+define('WP_MAIL_SMTP_PORT', 1025);
+define('WP_MAIL_SMTP_AUTH', false);
+define('WP_MAIL_SMTP_SECURE', '');

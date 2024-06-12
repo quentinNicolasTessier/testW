@@ -5,8 +5,8 @@
       <list>
         <option value="$PROJECT_DIR$/web/app/modules/wp-crontrol/tests" />
         <option value="$PROJECT_DIR$/web/wpcb/wp-includes/sodium_compat/tests" />
-        <option value="$PROJECT_DIR$/web/app/modules/soil/tests" />
         <option value="$PROJECT_DIR$/tests" />
+        <option value="$PROJECT_DIR$/web/app/modules/soil/tests" />
       </list>
     </option>
   </component>
