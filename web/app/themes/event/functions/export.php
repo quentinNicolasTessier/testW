@@ -95,14 +95,14 @@ function excel_file_cron()
             $post_id = get_the_ID();
             // Définir le type de fichier (Excel ou CSV)
             $fileType = 'xlsx';
-            $filePath = __DIR__ . "/cron/export-inscription-event-{$post_id}.{$fileType}";
+            $filePath = __DIR__ . "/../cron/export-inscription-event-{$post_id}.{$fileType}";
 
             // Créer un writer
             $writer = new Writer();
             // Ouvrir le writer
             $writer->openToFile($filePath);
             get_file_excel($post_id, $writer);
-            $excelFile[] = __DIR__  . "/cron/export-inscription-event-{$post_id}.{$fileType}";
+            $excelFile[] = __DIR__  . "/../cron/export-inscription-event-{$post_id}.{$fileType}";
         }
         $to = "testglob@yopmail.com";
         $subject = 'Liste des participants event';
